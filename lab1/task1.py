@@ -6,11 +6,13 @@ import matplotlib.pyplot as plt
 df = pd.read_csv('EuStockMarkets.csv')
 
 # Вопрос 1: Существуют ли в наборе данных взаимосвязанные столбцы?
+print("Вопрос 1: Существуют ли в наборе данных взаимосвязанные столбцы?")
 correlation_matrix = df.corr()
 print("Матрица корреляции:")
 print(correlation_matrix)
 
 # Вопрос 2: Среднее значение и дисперсия
+print("Вопрос 2: Среднее значение и дисперсия")
 mean_values = df.mean()
 variance_values = df.var()
 print("\nСреднее значение:")
@@ -19,7 +21,7 @@ print("\nДисперсия:")
 print(variance_values)
 
 # Вопрос 3: Изменяется ли диапазон доступных значений?
-# Можно рассмотреть изменение максимального и минимального значения для каждого столбца в течение времени.
+print("Вопрос 3: Изменяется ли диапазон доступных значений?")
 max_values = df.max()
 min_values = df.min()
 range_values = max_values - min_values
@@ -32,11 +34,13 @@ print(range_values)
 
 # Вопрос 4: Однородны ли данные?
 # Можно рассмотреть изменение стандартного отклонения для каждого столбца в течение времени.
+print("Вопрос 4: Однородны ли данные")
 std_deviation_values = df.std()
 print("\nСтандартное отклонение:")
 print(std_deviation_values)
 
 # Вопрос 5: Построить гистограмму абсолютных значений и гистограмму разностей
+print("Вопрос 5: Построить гистограмму абсолютных значений и гистограмму разностей")
 absolute_histogram = df.abs().hist(bins=20, figsize=(10, 6))
 plt.suptitle('Гистограмма абсолютных значений')
 plt.show()
@@ -46,6 +50,7 @@ plt.suptitle('Гистограмма разностей')
 plt.show()
 
 # Вопрос 6: Построить две диаграммы рассеяния
+print("Вопрос 6: Построить две диаграммы рассеяния")
 plt.scatter(df['DAX'], df['SMI'])
 plt.title('Диаграмма рассеяния между DAX и SMI')
 plt.xlabel('DAX')
@@ -61,6 +66,7 @@ plt.legend()
 plt.show()
 
 # Вопрос 7: Ковариация и ковариационная матрица
+print("Вопрос 7: Ковариация и ковариационная матрица")
 covariance = df[['DAX', 'SMI']].cov().iloc[0, 1]
 covariance_matrix = df.cov()
 print("\nКовариация DAX и SMI:")

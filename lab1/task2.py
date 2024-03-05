@@ -1,27 +1,63 @@
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+from statsmodels.graphics.tsaplots import plot_pacf
+from statsmodels.tsa.ar_model import AutoReg
+from statsmodels.tsa.stattools import pacf
+from sklearn.metrics import mean_squared_error
 
-# Загрузка данных (предположим, что у вас уже есть временной ряд Y)
-# Пример сгенерированного временного ряда:
-np.random.seed(42)
-Y = np.cumsum(np.random.normal(0, 1, 100))
+# Чтение данных из файла (замените "your_file.csv" на фактическое имя вашего файла)
+data = pd.read_csv("AirQualityUCI.csv", delimiter=';')
 
-# Функция для вычисления скользящего среднего с разными окнами
-def moving_average(data, window_sizes):
-    plt.figure(figsize=(10, 6))
-    plt.plot(Y, label='Оригинальный временной ряд', color='blue')
+# Преобразование формата даты и времени
+data['DateTime'] = pd.to_datetime(data['Date'] + ' ' + data['Time'], format='%d/%m/%Y %H.%M.%S')
 
-    for window_size in window_sizes:
-        ma = data.rolling(window=window_size).mean()
-        plt.plot(ma, label=f'Скользящее среднее (окно {window_size})')
+# Замена запятых на точки и преобразование числовых значений в числа с плавающей точкой
+numeric_columns = ['CO(GT)', 'PT08.S1(CO)', 'NMHC(GT)', 'C6H6(GT)', 'PT08.S2(NMHC)', 'NOx(GT)', 'PT08.S3(NOx)', 'NO2(GT)', 'PT08.S4(NO2)', 'PT08.S5(O3)', 'T', 'RH', 'AH']
+data[numeric_columns] = data[numeric_columns].replace(',', '.', regex=True).astype(float)
 
-    plt.title('Сравнение скользящего среднего с разными окнами')
-    plt.xlabel('Временные шаги')
-    plt.ylabel('Значения')
-    plt.legend()
-    plt.show()
+# Установка столбца DateTime в качестве индекса
+data.set_index('DateTime', inplace=True)
 
-# Применяем функцию с различными окнами
-window_sizes = [5, 10, 20]
-moving_average(pd.Series(Y), window_sizes)
+# Построение временных рядов
+plt.figure(figsize=(15, 10))
+for column in numeric_columns:
+    plt.plot(data.index, data[column], label=column)
+
+plt.title('Временные ряды переменных')
+plt.xlabel('Дата и время')
+plt.ylabel('Значение')
+plt.legend(loc='upper right')
+plt.show()
+
+
+# Построение графика PACF
+plt.figure(figsize=(10, 5))
+plot_pacf(data['CO(GT)'], lags=30, title='Partial Autocorrelation Function (PACF) for CO(GT)')
+plt.show()
+
+# Преобразование формата даты и времени, хз почему он забывает, но ошибка без этого
+data['DateTime'] = pd.to_datetime(data['Date'] + ' ' + data['Time'], format='%d/%m/%Y %H.%M.%S')
+
+# Установка столбца DateTime в качестве индекса
+data.set_index('DateTime', inplace=True)
+
+# Определение лага с помощью графика частичной автокорреляционной функции
+lag_pacf = pacf(data['CO(GT)'].dropna(), nlags=30)
+
+# Определение лага на основе значений PACF
+lag = np.argmax(np.abs(lag_pacf) < 0.05)
+
+# Создание и обучение модели AR
+model = AutoReg(data['CO(GT)'].dropna(), lags=1)
+results = model.fit()
+
+# Построение графика
+plt.figure(figsize=(15, 8))
+plt.plot(data['CO(GT)'], label='Actual')
+plt.plot(results.fittedvalues, color='red', label='AR Model')
+plt.title('AR Model for CO(GT)')
+plt.xlabel('DateTime')
+plt.ylabel('CO(GT)')
+plt.legend()
+plt.show()
